@@ -1,0 +1,12 @@
+# Node.js
+node_modules/
+
+# Logs
+*.log
+
+# Large / binary files
+*.dat
+
+# OS junk
+.DS_Store
+Thumbs.db
