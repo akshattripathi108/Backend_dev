@@ -1,20 +1,407 @@
-<html>
-    <head>
-        <title>Registration Page</title>
-    </head>
-    <body>
-        <h1>Registration Page</h1>
-        <form action="/register" method="POST">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required><br><br>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration & Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+        .form-section {
+            margin-bottom: 30px;
+        }
+        .form-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group.full {
+            grid-template-columns: 1fr;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-register {
+            background-color: #667eea;
+            color: white;
+        }
+        .btn-register:hover {
+            background-color: #5568d3;
+            transform: translateY(-2px);
+        }
+        .btn-get {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-get:hover {
+            background-color: #45a049;
+        }
+        .btn-put {
+            background-color: #2196F3;
+            color: white;
+        }
+        .btn-put:hover {
+            background-color: #0b7dda;
+        }
+        .btn-patch {
+            background-color: #ff9800;
+            color: white;
+        }
+        .btn-patch:hover {
+            background-color: #e68900;
+        }
+        .btn-trace {
+            background-color: #9C27B0;
+            color: white;
+        }
+        .btn-trace:hover {
+            background-color: #7b1fa2;
+        }
+        .response-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 5px;
+            display: none;
+        }
+        .response-section.show {
+            display: block;
+        }
+        .response-section h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        #responseOutput {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .section-title {
+            font-size: 1.3em;
+            color: #667eea;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 User Registration & Management System</h1>
 
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required><br><br>
+        <!-- Registration Form (POST) -->
+        <div class="form-section">
+            <div class="section-title">Register New User (POST)</div>
+            <form id="registrationForm">
+                <div class="form-group">
+                    <div>
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div>
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div>
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div>
+                        <label for="city">City:</label>
+                        <input type="text" id="city" name="city" required>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn-register">Register (POST)</button>
+                </div>
+            </form>
+        </div>
 
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required><br><br>
+        <!-- Retrieve User (GET) -->
+        <div class="form-section">
+            <div class="section-title">Retrieve User Data (GET)</div>
+            <div class="form-group full">
+                <label for="userId">User ID:</label>
+                <input type="number" id="userId" placeholder="Enter user ID to fetch">
+            </div>
+            <div class="button-group">
+                <button class="btn-get" onclick="getUser()">Get User (GET)</button>
+                <button class="btn-get" onclick="getAllUsers()">Get All Users (GET)</button>
+            </div>
+        </div>
 
-            <button type="submit">Register</button>
-        </form>
-    </body>
+        <!-- Update User (PUT) -->
+        <div class="form-section">
+            <div class="section-title">Update User (PUT)</div>
+            <div class="form-group">
+                <div>
+                    <label for="updateUserId">User ID:</label>
+                    <input type="number" id="updateUserId" placeholder="Enter user ID">
+                </div>
+                <div>
+                    <label for="updateUsername">Username:</label>
+                    <input type="text" id="updateUsername" placeholder="New username">
+                </div>
+            </div>
+            <div class="form-group">
+                <div>
+                    <label for="updateEmail">Email:</label>
+                    <input type="email" id="updateEmail" placeholder="New email">
+                </div>
+                <div>
+                    <label for="updateCity">City:</label>
+                    <input type="text" id="updateCity" placeholder="New city">
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn-put" onclick="updateUser()">Update (PUT)</button>
+            </div>
+        </div>
+
+        <!-- Partial Update (PATCH) -->
+        <div class="form-section">
+            <div class="section-title">Partial Update (PATCH)</div>
+            <div class="form-group">
+                <div>
+                    <label for="patchUserId">User ID:</label>
+                    <input type="number" id="patchUserId" placeholder="Enter user ID">
+                </div>
+                <div>
+                    <label for="patchField">Field to Update:</label>
+                    <select id="patchField">
+                        <option value="username">Username</option>
+                        <option value="email">Email</option>
+                        <option value="city">City</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group full">
+                <label for="patchValue">New Value:</label>
+                <input type="text" id="patchValue" placeholder="Enter new value">
+            </div>
+            <div class="button-group">
+                <button class="btn-patch" onclick="patchUser()">Update Field (PATCH)</button>
+            </div>
+        </div>
+
+        <!-- Trace Request -->
+        <div class="form-section">
+            <div class="section-title">Trace Request (TRACE)</div>
+            <p style="color: #666; margin-bottom: 15px;">View all headers and request details sent to the server.</p>
+            <div class="button-group">
+                <button class="btn-trace" onclick="traceRequest()">Trace Request (TRACE)</button>
+            </div>
+        </div>
+
+        <!-- Response Output -->
+        <div class="response-section" id="responseSection">
+            <h3>Server Response:</h3>
+            <div id="responseOutput">No response yet</div>
+        </div>
+    </div>
+
+    <script>
+        // Helper function to show response
+        function showResponse(data) {
+            const responseSection = document.getElementById('responseSection');
+            const responseOutput = document.getElementById('responseOutput');
+            responseOutput.textContent = JSON.stringify(data, null, 2);
+            responseSection.classList.add('show');
+        }
+
+        // POST - Register new user
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                city: document.getElementById('city').value
+            };
+
+            try {
+                const response = await fetch('/post', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                const data = await response.json();
+                showResponse(data);
+                this.reset();
+            } catch(error) {
+                showResponse({ error: error.message });
+            }
+        });
+
+        // GET - Retrieve single user
+        async function getUser() {
+            const userId = document.getElementById('userId').value;
+            if (!userId) {
+                showResponse({ error: 'Please enter a User ID' });
+                return;
+            }
+
+            try {
+                const response = await fetch(`/get/${userId}`);
+                const data = await response.json();
+                showResponse(data);
+            } catch(error) {
+                showResponse({ error: error.message });
+            }
+        }
+
+        // GET - Retrieve all users
+        async function getAllUsers() {
+            try {
+                const response = await fetch('/get');
+                const data = await response.json();
+                showResponse(data);
+            } catch(error) {
+                showResponse({ error: error.message });
+            }
+        }
+
+        // PUT - Update entire user
+        async function updateUser() {
+            const id = document.getElementById('updateUserId').value;
+            if (!id) {
+                showResponse({ error: 'Please enter a User ID' });
+                return;
+            }
+
+            const updateData = {
+                username: document.getElementById('updateUsername').value,
+                email: document.getElementById('updateEmail').value,
+                city: document.getElementById('updateCity').value
+            };
+
+            try {
+                const response = await fetch(`/put/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+                const data = await response.json();
+                showResponse(data);
+            } catch(error) {
+                showResponse({ error: error.message });
+            }
+        }
+
+        // PATCH - Update specific field
+        async function patchUser() {
+            const id = document.getElementById('patchUserId').value;
+            const field = document.getElementById('patchField').value;
+            const value = document.getElementById('patchValue').value;
+
+            if (!id || !value) {
+                showResponse({ error: 'Please enter User ID and value' });
+                return;
+            }
+
+            const patchData = {
+                field: field,
+                value: value
+            };
+
+            try {
+                const response = await fetch(`/patch/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(patchData)
+                });
+                const data = await response.json();
+                showResponse(data);
+            } catch(error) {
+                showResponse({ error: error.message });
+            }
+        }
+
+        // TRACE - Trace request
+        async function traceRequest() {
+            try {
+                const response = await fetch('/trace', {
+                    method: 'TRACE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                showResponse(data);
+            } catch(error) {
+                showResponse({ error: error.message });
+            }
+        }
+    </script>
+</body>
 </html>
