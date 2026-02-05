@@ -68,6 +68,34 @@
             outline: none;
             border-color: #667eea;
         }
+        .password-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            background: #f9f9f9;
+            padding: 8px;
+            border-radius: 3px;
+            border-left: 3px solid #667eea;
+        }
+        .password-strength {
+            margin-top: 8px;
+            padding: 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .strength-weak {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .strength-medium {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .strength-strong {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
         .button-group {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -91,6 +119,20 @@
             background-color: #5568d3;
             transform: translateY(-2px);
         }
+        .btn-password {
+            background-color: #ff6b6b;
+            color: white;
+        }
+        .btn-password:hover {
+            background-color: #ee5a52;
+        }
+        .btn-forgot {
+            background-color: #ffa500;
+            color: white;
+        }
+        .btn-forgot:hover {
+            background-color: #ff8c00;
+        }
         .btn-get {
             background-color: #4CAF50;
             color: white;
@@ -106,17 +148,10 @@
             background-color: #0b7dda;
         }
         .btn-patch {
-            background-color: #ff9800;
-            color: white;
-        }
-        .btn-patch:hover {
-            background-color: #e68900;
-        }
-        .btn-trace {
             background-color: #9C27B0;
             color: white;
         }
-        .btn-trace:hover {
+        .btn-patch:hover {
             background-color: #7b1fa2;
         }
         .response-section {
@@ -153,6 +188,18 @@
             border-bottom: 2px solid #667eea;
             padding-bottom: 10px;
         }
+        .error-message {
+            color: #c62828;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        .success-message {
+            color: #2e7d32;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -176,7 +223,11 @@
                 <div class="form-group">
                     <div>
                         <label for="password">Password:</label>
-                        <input type="password" id="password" name="password" required>
+                        <input type="password" id="password" name="password" required onkeyup="checkPasswordStrength()">
+                        <div class="password-info">
+                            Must contain: Uppercase (A-Z), Lowercase (a-z), Number (0-9), Special char (!@#$%^&*)
+                        </div>
+                        <div id="strengthIndicator"></div>
                     </div>
                     <div>
                         <label for="city">City:</label>
@@ -187,6 +238,46 @@
                     <button type="submit" class="btn-register">Register (POST)</button>
                 </div>
             </form>
+        </div>
+
+        <!-- Change Password -->
+        <div class="form-section">
+            <div class="section-title">Change Password</div>
+            <div class="form-group full">
+                <label for="changePasswordUserId">User ID:</label>
+                <input type="number" id="changePasswordUserId" placeholder="Enter user ID">
+            </div>
+            <div class="form-group">
+                <div>
+                    <label for="oldPassword">Old Password:</label>
+                    <input type="password" id="oldPassword" placeholder="Enter current password">
+                </div>
+                <div>
+                    <label for="newPassword">New Password:</label>
+                    <input type="password" id="newPassword" placeholder="Enter new password" onkeyup="checkPasswordStrength()">
+                    <div id="strengthIndicator2"></div>
+                </div>
+            </div>
+            <div class="form-group full">
+                <label for="confirmPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                <div class="error-message" id="passwordMismatch">Passwords do not match!</div>
+            </div>
+            <div class="button-group">
+                <button class="btn-password" onclick="changePassword()">Change Password</button>
+            </div>
+        </div>
+
+        <!-- Forgot Password -->
+        <div class="form-section">
+            <div class="section-title">Forgot Password</div>
+            <div class="form-group full">
+                <label for="forgotEmail">Email Address:</label>
+                <input type="email" id="forgotEmail" placeholder="Enter your registered email">
+            </div>
+            <div class="button-group">
+                <button class="btn-forgot" onclick="forgotPassword()">Send Reset Link</button>
+            </div>
         </div>
 
         <!-- Retrieve User (GET) -->
@@ -256,15 +347,6 @@
             </div>
         </div>
 
-        <!-- Trace Request -->
-        <div class="form-section">
-            <div class="section-title">Trace Request (TRACE)</div>
-            <p style="color: #666; margin-bottom: 15px;">View all headers and request details sent to the server.</p>
-            <div class="button-group">
-                <button class="btn-trace" onclick="traceRequest()">Trace Request (TRACE)</button>
-            </div>
-        </div>
-
         <!-- Response Output -->
         <div class="response-section" id="responseSection">
             <h3>Server Response:</h3>
@@ -273,6 +355,9 @@
     </div>
 
     <script>
+        // Password validation regex
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        
         // Helper function to show response
         function showResponse(data) {
             const responseSection = document.getElementById('responseSection');
@@ -281,13 +366,47 @@
             responseSection.classList.add('show');
         }
 
+        // Check password strength
+        function checkPasswordStrength(inputId = 'password') {
+            const password = document.getElementById(inputId).value;
+            const strengthIndicator = inputId === 'password' ? document.getElementById('strengthIndicator') : document.getElementById('strengthIndicator2');
+            
+            if (!password) {
+                strengthIndicator.innerHTML = '';
+                return;
+            }
+
+            let strength = 'Weak';
+            let strengthClass = 'strength-weak';
+
+            if (password.length >= 8 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password) && /[@$!%*?&]/.test(password)) {
+                strength = 'Strong';
+                strengthClass = 'strength-strong';
+            } else if (password.length >= 6 && /[a-z]/.test(password) && /[A-Z]/.test(password)) {
+                strength = 'Medium';
+                strengthClass = 'strength-medium';
+            }
+
+            strengthIndicator.innerHTML = `<div class="password-strength ${strengthClass}">Strength: ${strength}</div>`;
+        }
+
         // POST - Register new user
         document.getElementById('registrationForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            const password = document.getElementById('password').value;
+
+            if (!passwordRegex.test(password)) {
+                showResponse({ 
+                    error: 'Invalid Password',
+                    message: 'Password must contain: Uppercase (A-Z), Lowercase (a-z), Number (0-9), Special character (!@#$%^&*), and be at least 8 characters long'
+                });
+                return;
+            }
+
             const formData = {
                 username: document.getElementById('username').value,
                 email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
+                password: password,
                 city: document.getElementById('city').value
             };
 
@@ -300,10 +419,81 @@
                 const data = await response.json();
                 showResponse(data);
                 this.reset();
+                document.getElementById('strengthIndicator').innerHTML = '';
             } catch(error) {
                 showResponse({ error: error.message });
             }
         });
+
+        // Change Password
+        async function changePassword() {
+            const userId = document.getElementById('changePasswordUserId').value;
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!userId || !oldPassword || !newPassword || !confirmPassword) {
+                showResponse({ error: 'Please fill all password fields' });
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showResponse({ error: 'New passwords do not match!' });
+                return;
+            }
+
+            if (!passwordRegex.test(newPassword)) {
+                showResponse({ 
+                    error: 'Invalid Password',
+                    message: 'Password must contain: Uppercase (A-Z), Lowercase (a-z), Number (0-9), Special character (!@#$%^&*), and be at least 8 characters long'
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch(`/change-password/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ oldPassword, newPassword })
+                });
+                const data = await response.json();
+                showResponse(data);
+                if (data.success) {
+                    document.getElementById('changePasswordUserId').value = '';
+                    document.getElementById('oldPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                    document.getElementById('strengthIndicator2').innerHTML = '';
+                }
+            } catch(error) {
+                showResponse({ error: error.message });
+            }
+        }
+
+        // Forgot Password
+        async function forgotPassword() {
+            const email = document.getElementById('forgotEmail').value;
+
+            if (!email) {
+                showResponse({ error: 'Please enter your email address' });
+                return;
+            }
+
+            try {
+                const response = await fetch('/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await response.json();
+                showResponse(data);
+                if (data.success) {
+                    document.getElementById('forgotEmail').value = '';
+                }
+            } catch(error) {
+                showResponse({ error: error.message });
+            }
+        }
 
         // GET - Retrieve single user
         async function getUser() {
@@ -381,20 +571,6 @@
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(patchData)
-                });
-                const data = await response.json();
-                showResponse(data);
-            } catch(error) {
-                showResponse({ error: error.message });
-            }
-        }
-
-        // TRACE - Trace request
-        async function traceRequest() {
-            try {
-                const response = await fetch('/trace', {
-                    method: 'TRACE',
-                    headers: { 'Content-Type': 'application/json' }
                 });
                 const data = await response.json();
                 showResponse(data);

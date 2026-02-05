@@ -6,6 +6,8 @@ import { postEndpoint } from "./post_endpoint.js";
 import { putEndpoint } from "./put_endpoint.js";
 import { patchEndpoint } from "./patch_endpoint.js";
 import { traceEndpoint } from "./trace_endpoint.js";
+import { changePasswordEndpoint } from "./change_password_endpoint.js";
+import { forgotPasswordEndpoint } from "./forgot_password_endpoint.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -41,6 +43,10 @@ patchEndpoint(app);
 
 // TRACE Endpoint - Echo request details
 traceEndpoint(app);
+
+// PASSWORD MANAGEMENT ENDPOINTS
+changePasswordEndpoint(app);
+forgotPasswordEndpoint(app);
 
 // ============ LEGACY ENDPOINTS (kept for compatibility) ============
 
@@ -92,11 +98,14 @@ app.post("/user",validationPost,(req,res)=>{
 app.listen(port,()=>{
     console.log(`Server is running on http://localhost:${port}`)
     console.log("Available endpoints:")
-    console.log("  GET  /         - Registration page")
-    console.log("  GET  /get      - Get all users")
-    console.log("  GET  /get/:id  - Get user by ID")
-    console.log("  POST /post     - Register new user")
-    console.log("  PUT  /put/:id  - Update entire user (PUT)")
-    console.log("  PATCH /patch/:id - Partial update (PATCH)")
-    console.log("  TRACE /trace   - Request trace")
+    console.log("  GET  /              - Registration page")
+    console.log("  GET  /get           - Get all users")
+    console.log("  GET  /get/:id       - Get user by ID")
+    console.log("  POST /post          - Register new user")
+    console.log("  PUT  /put/:id       - Update entire user (PUT)")
+    console.log("  PATCH /patch/:id    - Partial update (PATCH)")
+    console.log("  PUT  /change-password/:id - Change user password")
+    console.log("  POST /forgot-password    - Request password reset")
+    console.log("  POST /reset-password     - Reset password with token")
+    console.log("  TRACE /trace        - Request trace")
 })
