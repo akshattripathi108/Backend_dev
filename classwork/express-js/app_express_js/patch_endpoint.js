@@ -5,6 +5,14 @@ export function patchEndpoint(app) {
     app.patch("/patch/:id", (req, res) => {
         try {
             const userId = parseInt(req.params.id);
+            
+            if (!req.body) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Request body is required. Please send JSON data with Content-Type: application/json header"
+                });
+            }
+            
             const { field, value } = req.body;
 
             // Validation

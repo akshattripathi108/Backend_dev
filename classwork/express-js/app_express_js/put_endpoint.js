@@ -5,6 +5,15 @@ export function putEndpoint(app) {
     app.put("/put/:id", (req, res) => {
         try {
             const userId = parseInt(req.params.id);
+            
+            // Check if body exists
+            if (!req.body) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Request body is required. Please send JSON data with Content-Type: application/json header"
+                });
+            }
+            
             const { username, email, city } = req.body;
 
             // Validation
@@ -18,7 +27,8 @@ export function putEndpoint(app) {
             if (!username || !email || !city) {
                 return res.status(400).json({
                     success: false,
-                    message: "All fields (username, email, city) are required for PUT request"
+                    message: "All fields (username, email, city) are required for PUT request",
+                    receivedData: req.body
                 });
             }
 
