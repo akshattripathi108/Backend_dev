@@ -1,1 +1,0 @@
-This is a log entry created using Node.js fs module.
