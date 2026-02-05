@@ -13,7 +13,6 @@ export function postEndpoint(app) {
                     message: "All fields (username, email, password, city) are required"
                 });
             }
-
             // Check if user already exists
             const existingUser = userData.find(user => user.email === email);
             if (existingUser) {
@@ -22,7 +21,6 @@ export function postEndpoint(app) {
                     message: "User with this email already exists"
                 });
             }
-
             // Create new user
             const newUser = {
                 id: userData.length > 0 ? Math.max(...userData.map(u => u.id)) + 1 : 1,
