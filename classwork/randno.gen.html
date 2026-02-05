@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Number Generator</title>
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <style>
+        /* Flexbox layout for page body */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .card {
+            border-radius: 10px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.2);
+        }
+
+        .card-title {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* Button group container with flexbox */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        /* Badge styling */
+        .badge-custom {
+            display: inline-block;
+            background-color: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        /* Form control styling */
+        .form-control-custom {
+            border: 1px solid #667eea;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        .form-control-custom:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Alert result box */
+        .alert-custom {
+            margin-top: 15px;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive adjustments for small screens */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                border-radius: 10px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding-top: 10px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <script>
+        let lastGeneratedNumbers = []; // Store numbers globally for copy/export
+
+        function generateRandomNumber() {
+            // Get input values from the form
+            const minVal = parseInt(document.getElementById('minVal').value) || 1;
+            const maxVal = parseInt(document.getElementById('maxVal').value) || 100;
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+
+            // Validate inputs
+            if (isNaN(minVal) || isNaN(maxVal) || isNaN(quantity)) {
+                alert('Please enter valid numbers for Min, Max, and Quantity.');
+                return;
+            }
+
+            if (minVal > maxVal) {
+                alert('Minimum value must be less than or equal to Maximum value.');
+                return;
+            }
+
+            if (quantity < 1) {
+                alert('Quantity must be at least 1.');
+                return;
+            }
+
+            // Generate random numbers
+            const numbers = [];
+            for (let i = 0; i < quantity; i++) {
+                const randomNumber = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
+                numbers.push(randomNumber);
+            }
+
+            lastGeneratedNumbers = numbers; // Store for copy/export
+
+            // Calculate stats
+            const sorted = [...numbers].sort((a, b) => a - b);
+            const min = Math.min(...numbers);
+            const max = Math.max(...numbers);
+            const avg = (numbers.reduce((a, b) => a + b, 0) / numbers.length).toFixed(2);
+            const sum = numbers.reduce((a, b) => a + b, 0);
+
+            // Display results in Bootstrap alert with enhanced formatting
+            const resultEl = document.getElementById('result');
+            const numbersList = numbers.map(num => `<span class="badge bg-primary me-2 mb-2">${num}</span>`).join('');
+            const sortedList = sorted.map(num => `<span class="badge bg-secondary me-2 mb-2">${num}</span>`).join('');
+            
+            resultEl.innerHTML = `
+                <div class="alert alert-success alert-custom" role="alert">
+                    <strong>Generated ${quantity} Number(s):</strong><br>
+                    <div class="mt-2 mb-3">${numbersList}</div>
+                    
+                    <hr class="my-2">
+                    
+                    <div class="row mt-3 mb-3">
+                        <div class="col-6">
+                            <small><strong>Min:</strong> ${min}</small>
+                        </div>
+                        <div class="col-6">
+                            <small><strong>Max:</strong> ${max}</small>
+                        </div>
+                        <div class="col-6 mt-2">
+                            <small><strong>Avg:</strong> ${avg}</small>
+                        </div>
+                        <div class="col-6 mt-2">
+                            <small><strong>Sum:</strong> ${sum}</small>
+                        </div>
+                    </div>
+                    
+                    <details class="mt-3">
+                        <summary style="cursor: pointer; color: #667eea; font-weight: 500;">📊 Sorted Order</summary>
+                        <div class="mt-2">${sortedList}</div>
+                    </details>
+
+                    <small class="text-muted mt-2 d-block">Range: ${minVal} – ${maxVal}</small>
+
+                    <!-- Action buttons -->
+                    <div class="d-flex gap-2 mt-3">
+                        <button onclick="copyToClipboard()" class="btn btn-sm btn-outline-primary">
+                            📋 Copy
+                        </button>
+                        <button onclick="exportAsCSV()" class="btn btn-sm btn-outline-success">
+                            📥 CSV
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Update badge count
+            let count = parseInt(localStorage.getItem('generationCount') || '0') + quantity;
+            localStorage.setItem('generationCount', count);
+            document.getElementById('countBadge').innerText = count;
+        }
+
+        function copyToClipboard() {
+            if (lastGeneratedNumbers.length === 0) {
+                alert('No numbers to copy. Generate some first!');
+                return;
+            }
+
+            const text = lastGeneratedNumbers.join(', ');
+            navigator.clipboard.writeText(text).then(() => {
+                // Show feedback
+                const btn = event.target;
+                const originalText = btn.innerText;
+                btn.innerText = '✅ Copied!';
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                }, 2000);
+            }).catch(() => {
+                alert('Failed to copy. Please try again.');
+            });
+        }
+
+        function exportAsCSV() {
+            if (lastGeneratedNumbers.length === 0) {
+                alert('No numbers to export. Generate some first!');
+                return;
+            }
+
+            const minVal = parseInt(document.getElementById('minVal').value) || 1;
+            const maxVal = parseInt(document.getElementById('maxVal').value) || 100;
+            const timestamp = new Date().toLocaleString();
+
+            // Calculate stats
+            const sorted = [...lastGeneratedNumbers].sort((a, b) => a - b);
+            const min = Math.min(...lastGeneratedNumbers);
+            const max = Math.max(...lastGeneratedNumbers);
+            const avg = (lastGeneratedNumbers.reduce((a, b) => a + b, 0) / lastGeneratedNumbers.length).toFixed(2);
+            const sum = lastGeneratedNumbers.reduce((a, b) => a + b, 0);
+
+            // Create CSV content
+            let csvContent = 'data:text/csv;charset=utf-8,';
+            csvContent += 'Random Number Generator Export\n';
+            csvContent += `Generated: ${timestamp}\n`;
+            csvContent += `Range: ${minVal} – ${maxVal}\n`;
+            csvContent += `Quantity: ${lastGeneratedNumbers.length}\n\n`;
+            csvContent += 'Statistics\n';
+            csvContent += `Minimum,${min}\n`;
+            csvContent += `Maximum,${max}\n`;
+            csvContent += `Average,${avg}\n`;
+            csvContent += `Sum,${sum}\n\n`;
+            csvContent += 'Generated Numbers\n';
+            csvContent += lastGeneratedNumbers.join('\n');
+            csvContent += '\n\nSorted Numbers\n';
+            csvContent += sorted.join('\n');
+
+            // Create download link
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `random-numbers-${Date.now()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function clearResult() {
+            document.getElementById('result').innerHTML = '';
+            lastGeneratedNumbers = [];
+        }
+
+        function resetCount() {
+            localStorage.setItem('generationCount', '0');
+            document.getElementById('countBadge').innerText = '0';
+            clearResult();
+        }
+
+        // Initialize count on page load
+        window.addEventListener('load', function() {
+            const count = localStorage.getItem('generationCount') || '0';
+            document.getElementById('countBadge').innerText = count;
+        });
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <!-- Header with badge -->
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h1 class="mb-2">🎲 Random Number Generator</h1>
+                <span class="badge bg-info">Generations: <span id="countBadge">0</span></span>
+            </div>
+        </div>
+
+        <!-- Main content row with grid layout -->
+        <div class="row">
+            <!-- Left column: Controls -->
+            <div class="col-md-6 mb-4">
+                <div class="card border-light shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">⚙️ Configuration</h5>
+                        <div class="mb-3">
+                            <label for="minVal" class="form-label">Minimum Value:</label>
+                            <input type="number" id="minVal" class="form-control form-control-custom" value="1" placeholder="Min">
+                        </div>
+                        <div class="mb-3">
+                            <label for="maxVal" class="form-label">Maximum Value:</label>
+                            <input type="number" id="maxVal" class="form-control form-control-custom" value="100" placeholder="Max">
+                        </div>
+                        <div class="mb-3">
+                            <label for="quantity" class="form-label">Quantity (how many?):</label>
+                            <input type="number" id="quantity" class="form-control form-control-custom" value="1" min="1" placeholder="1">
+                        </div>
+                        <div class="alert alert-light border border-info" role="alert">
+                            <small><strong>Tip:</strong> Default range is 1–100. Adjust as needed!</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column: Result and buttons -->
+            <div class="col-md-6 mb-4">
+                <div class="card border-light shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">✨ Result</h5>
+                        
+                        <!-- Button group using Flexbox and Bootstrap -->
+                        <div class="button-group mb-3">
+                            <button onclick="generateRandomNumber()" class="btn btn-primary flex-grow-1">
+                                <i class="bi bi-play-fill"></i> Generate
+                            </button>
+                            <button onclick="clearResult()" class="btn btn-outline-secondary flex-grow-1">
+                                <i class="bi bi-trash"></i> Clear
+                            </button>
+                        </div>
+
+                        <button onclick="resetCount()" class="btn btn-sm btn-outline-danger w-100 mb-3">Reset Count</button>
+
+                        <!-- Result display with Bootstrap alert -->
+                        <div id="result"></div>
+
+                        <!-- Info badges -->
+                        <div class="mt-3">
+                            <span class="badge bg-secondary">Range: <span id="rangeBadge">1–100</span></span>
+                            <span class="badge bg-warning text-dark">Quick & Easy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer section with more info -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="alert alert-info" role="alert">
+                    <strong>ℹ️ How to use:</strong> Enter your desired range in the left panel, select quantity, then click <strong>Generate</strong>. Your generated numbers will appear on the right with Bootstrap-styled alerts!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWbSxccPQtF3EpF3fnucOn7Ai4EvuP+E//0ScMsozIQSLyPrp" crossorigin="anonymous"></script>
+</body>
+</html>
