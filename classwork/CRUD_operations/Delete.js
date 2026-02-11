@@ -19,7 +19,9 @@ app.delete('/students/:id', (req, res) => {
     students.splice(studentIndex, 1);
     res.json({ message: 'Student deleted successfully' });
 });
-
+app.get('/students', (req, res) => {
+    res.json(students);
+});
 const PORT = 8000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
