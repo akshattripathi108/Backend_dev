@@ -15,17 +15,10 @@ app.delete('/students/:id', (req, res) => {
     if (student_marks > 70) {
         return res.status(400).json({ message: 'Student with marks greater than 70 cannot be deleted' });
     }
-    else if (student_marks <= 70) {
+    else  {
         students.splice(studentIndex, 1);
         return res.json({ message: 'Student deleted successfully' });
-    }
-    if (studentIndex === -1) {
-        return res.status(404).json({ message: 'Student not found' });
-    }
-
-    students.splice(studentIndex, 1);
-    res.json({ message: 'Student deleted successfully' });
-});
+    }});
 app.get('/students', (req, res) => {
     res.json(students);
 });
