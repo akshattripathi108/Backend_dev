@@ -3,9 +3,9 @@ const app = express();
 app.use(express.json());
 
 let items = [
-    { id: 1, name: 'Item 1', description: 'This is item 1' },
-    { id: 2, name: 'Item 2', description: 'This is item 2' },
-    { id: 3, name: 'Item 3', description: 'This is item 3' }
+    { id: 1, name: 'rajit', description: 'This is rajit.' },
+    { id: 2, name: 'Sanskar', description: 'This is sanskar' },
+    { id: 3, name: 'Ayushman', description: 'This is Ayushman' }
 ];
 
 app.patch('/items/:id', (req, res) => {
@@ -13,7 +13,7 @@ app.patch('/items/:id', (req, res) => {
     const item = items.find(i => i.id === itemId);
 
     if (!item) {
-        return res.status(404).json({ message: 'Item not found' });
+        return res.status(404).json({ message: 'student not found' });
     }
 
     const { name, description } = req.body;
@@ -25,10 +25,11 @@ app.patch('/items/:id', (req, res) => {
         item.description = description;
     }
 
-    res.json({ message: 'Item updated successfully', item });
+    res.json({ message: 'Student updated successfully', item });
 });
 
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
