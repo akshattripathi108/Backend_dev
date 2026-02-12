@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Clone</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button id="hamburger" class="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <i class="fab fa-youtube"></i>
+                <span>YouTube</span>
+            </div>
+        </div>
+
+        <div class="header-center">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search">
+            <button class="search-btn">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+
+        <div class="header-right">
+            <button class="icon-btn">
+                <i class="fas fa-video"></i>
+            </button>
+            <button class="icon-btn">
+                <i class="fas fa-bell"></i>
+            </button>
+            <button class="icon-btn profile-btn">
+                <i class="fas fa-user-circle"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <nav class="nav-menu">
+            <div class="nav-item active">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-fire"></i>
+                <span>Trending</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-music"></i>
+                <span>Music</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-film"></i>
+                <span>Movies</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-gamepad"></i>
+                <span>Gaming</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-newspaper"></i>
+                <span>News</span>
+            </div>
+            <hr>
+            <div class="nav-item">
+                <i class="fas fa-heart"></i>
+                <span>Liked Videos</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-history"></i>
+                <span>History</span>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Categories -->
+        <div class="categories">
+            <div class="category-btn active">All</div>
+            <div class="category-btn">Gaming</div>
+            <div class="category-btn">Music</div>
+            <div class="category-btn">Movies</div>
+            <div class="category-btn">Sports</div>
+            <div class="category-btn">Comedy</div>
+            <div class="category-btn">News</div>
+            <div class="category-btn">Technology</div>
+        </div>
+
+        <!-- Videos Grid -->
+        <div class="videos-container" id="videosContainer">
+            <!-- Video cards will be generated here by JavaScript -->
+        </div>
+    </main>
+
+    <!-- Video Modal -->
+    <div class="modal" id="videoModal">
+        <div class="modal-content">
+            <button class="close-btn">&times;</button>
+            <video id="modalVideo" width="100%" height="auto" controls></video>
+            <h2 id="modalTitle"></h2>
+            <div class="video-info">
+                <div class="channel-info">
+                    <img id="channelImg" class="channel-avatar" src="" alt="">
+                    <div>
+                        <div id="channelName" class="channel-name"></div>
+                        <div class="video-stats">
+                            <span id="views"></span> • <span id="uploadDate"></span>
+                        </div>
+                    </div>
+                </div>
+                <button class="subscribe-btn">Subscribe</button>
+            </div>
+            <div class="video-description" id="videoDesc"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
