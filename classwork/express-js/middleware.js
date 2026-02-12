@@ -40,3 +40,20 @@
 // app.listen(PORT, () => {
 //     console.log(`Server is running on port ${PORT}`);
 // });
+
+
+//third party middleware
+const express = require('express');
+const morgan = require('morgan'); //morgan is a third party middleware for logging HTTP requests
+const app = express();
+
+app.use(morgan('dev')); //use morgan middleware in development mode
+
+app.get('/test', (req, res) => {
+    res.send('We are learning about third party middleware in Express.js');
+});
+
+const PORT = 8000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+}); 
