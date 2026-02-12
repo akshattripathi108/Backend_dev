@@ -10,3 +10,6 @@ node_modules/
 # OS junk
 .DS_Store
 Thumbs.db
+# Package files
+package.json
+package-lock.json
