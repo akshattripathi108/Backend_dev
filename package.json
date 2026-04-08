@@ -1,0 +1,20 @@
+{
+  "name": "middleware-encryption-example",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "connect-mongo": "^6.0.0",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^17.4.1",
+    "express": "^4.22.1",
+    "express-session": "^1.19.0",
+    "mongoose": "^9.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
