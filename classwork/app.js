@@ -4,7 +4,7 @@ require('dotenv').config();
 const { decryptRequestMiddleware, encryptResponseMiddleware } = require('./middleware');
 const { generateSecretKey } = require('./encrypt');
 const { initializeSessionMiddleware, getSessionMiddleware } = require('./session');
-const { loginHandler, sessionCheckMiddleware, getProfileHandler, logoutHandler, getSessionStatus, initializeDefaultUsers } = require('./auth');
+const { registerHandler, loginHandler, sessionCheckMiddleware, getProfileHandler, logoutHandler, getSessionStatus, initializeDefaultUsers } = require('./auth');
 const { connectDB } = require('./config/database');
 
 const app = express();
@@ -16,6 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const ROUTES = [
+  { method: 'POST', path: '/register', description: 'Register a new user account' },
   { method: 'POST', path: '/login', description: 'Login with username and password' },
   { method: 'GET', path: '/session-check', description: 'Check if user has active session' },
   { method: 'GET', path: '/profile', description: 'Get authenticated user profile' },
@@ -28,6 +29,17 @@ const ROUTES = [
 ];
 
 const setupRoutes = () => {
+  app.post('/register', async (req, res) => {
+    try {
+      const result = await registerHandler(req, res, req.body);
+      if (!result.success) return res.status(400).json(result);
+      res.json(result);
+    } catch (error) {
+      console.error('Register error:', error);
+      res.status(500).json({ success: false, message: 'Registration failed due to server error' });
+    }
+  });
+
   app.post('/login', async (req, res) => {
     try {
       const result = await loginHandler(req, res, req.body);
@@ -85,7 +97,7 @@ const setupRoutes = () => {
       version: '1.0.0',
       status: 'running',
       authentication: 'Session-based with cookies + MongoDB',
-      note: 'Login first with POST /login, then use other protected routes',
+      note: 'Register or login first, then use other protected routes',
       testAccounts: [
         { username: 'alice', password: 'password123' },
         { username: 'bob', password: 'securepass' }
@@ -105,6 +117,7 @@ const setupRoutes = () => {
   app.use((req, res) => {
     res.status(404).json({ error: 'Not Found', path: req.path, method: req.method });
   });
+
 
   app.use((err, req, res, next) => {
     console.error('Error:', err);

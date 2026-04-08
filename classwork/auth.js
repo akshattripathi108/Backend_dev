@@ -25,6 +25,20 @@ const verifyCredentials = async (username, password) => {
   return { id: user._id.toString(), username: user.username, email: user.email };
 };
 
+const registerHandler = async (req, res, credentials) => {
+  const { username, password, email } = credentials;
+  if (!username || !password || !email) return { success: false, message: 'Username, email, and password are required' };
+  const normalizedUsername = username.toLowerCase().trim();
+  const existingUser = await User.findOne({ $or: [{ username: normalizedUsername }, { email: email.toLowerCase().trim() }] });
+  if (existingUser) return { success: false, message: 'Username or email already in use' };
+  const user = await User.create({ username: normalizedUsername, password, email: email.toLowerCase().trim() });
+  const sessionUser = { id: user._id.toString(), username: user.username, email: user.email };
+  req.session.user = createSessionData(sessionUser);
+  req.session.lastActivity = Date.now();
+  setTrackingCookie(res, `tracking_${user._id.toString()}_${Date.now()}`);
+  return { success: true, message: 'Registration successful', user: sessionUser };
+};
+
 const loginHandler = async (req, res, credentials) => {
   const { username, password } = credentials;
   if (!username || !password) return { success: false, message: 'Username and password are required' };
@@ -87,4 +101,4 @@ const getSessionStatus = (req) => {
   };
 };
 
-module.exports = { verifyCredentials, loginHandler, sessionCheckMiddleware, getProfileHandler, logoutHandler, getSessionStatus, initializeDefaultUsers };
+module.exports = { verifyCredentials, registerHandler, loginHandler, sessionCheckMiddleware, getProfileHandler, logoutHandler, getSessionStatus, initializeDefaultUsers };
