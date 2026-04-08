@@ -11,12 +11,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const SECRET_KEY = process.env.SECRET_KEY || generateSecretKey();
 
-// Core middleware setup (before session and routes)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Routes available
 const ROUTES = [
   { method: 'POST', path: '/login', description: 'Login with username and password' },
   { method: 'GET', path: '/session-check', description: 'Check if user has active session' },
@@ -29,22 +27,11 @@ const ROUTES = [
   { method: 'GET', path: '/routes', description: 'Get all available routes' }
 ];
 
-// Function to setup routes - will be called after session middleware is added
 const setupRoutes = () => {
-  // ===== Authentication Routes =====
-
-  /**
-   * POST /login
-   * Login with username and password
-   */
   app.post('/login', async (req, res) => {
     try {
       const result = await loginHandler(req, res, req.body);
-      
-      if (!result.success) {
-        return res.status(401).json(result);
-      }
-
+      if (!result.success) return res.status(401).json(result);
       res.json(result);
     } catch (error) {
       console.error('Login error:', error);
@@ -52,72 +39,36 @@ const setupRoutes = () => {
     }
   });
 
-  /**
-   * GET /session-check
-   */
   app.get('/session-check', sessionCheckMiddleware, (req, res) => {
-    res.json({
-      isActive: true,
-      message: 'User has active session',
-      user: req.user
-    });
+    res.json({ isActive: true, message: 'User has active session', user: req.user });
   });
 
-  /**
-   * GET /profile
-   */
   app.get('/profile', sessionCheckMiddleware, async (req, res) => {
     try {
       const profile = await getProfileHandler(req);
-      
-      if (!profile) {
-        return res.status(404).json({ error: 'User profile not found' });
-      }
-
-      res.json({
-        message: 'User profile retrieved successfully',
-        profile
-      });
+      if (!profile) return res.status(404).json({ error: 'User profile not found' });
+      res.json({ message: 'User profile retrieved successfully', profile });
     } catch (error) {
       console.error('Profile fetch error:', error);
       res.status(500).json({ error: 'Failed to retrieve profile' });
     }
   });
 
-  /**
-   * POST /logout
-   */
   app.post('/logout', sessionCheckMiddleware, (req, res) => {
-    logoutHandler(req, (result) => {
-      res.json(result);
-    });
+    logoutHandler(req, (result) => res.json(result));
   });
 
-  /**
-   * GET /session-status
-   */
   app.get('/session-status', (req, res) => {
     const status = getSessionStatus(req);
     res.json(status);
   });
 
-  // ===== Encryption Routes (Optional) =====
-
   app.get('/data', encryptResponseMiddleware(SECRET_KEY), (req, res) => {
-    res.json({ 
-      id: 1, 
-      name: 'Sample Data', 
-      timestamp: Date.now(), 
-      content: 'This is encrypted sample data.' 
-    });
+    res.json({ id: 1, name: 'Sample Data', timestamp: Date.now(), content: 'This is encrypted sample data.' });
   });
 
   app.post('/decrypt', decryptRequestMiddleware(SECRET_KEY), (req, res) => {
-    res.json({ 
-      message: 'Decryption successful',
-      decryptedBody: req.body, 
-      decryptedPayload: req.decryptedPayload 
-    });
+    res.json({ message: 'Decryption successful', decryptedBody: req.body, decryptedPayload: req.decryptedPayload });
   });
 
   app.get('/encrypt', encryptResponseMiddleware(SECRET_KEY), (req, res) => {
@@ -127,8 +78,6 @@ const setupRoutes = () => {
   app.get('/encrypt-always', encryptResponseMiddleware(SECRET_KEY, { autoEncrypt: true }), (req, res) => {
     res.json({ message: 'Auto-encrypted response.' });
   });
-
-  // ===== Information Routes =====
 
   app.get('/', (req, res) => {
     res.json({
@@ -146,55 +95,30 @@ const setupRoutes = () => {
   });
 
   app.get('/routes', (req, res) => {
-    res.json({ 
-      message: 'Available routes',
-      routes: ROUTES 
-    });
+    res.json({ message: 'Available routes', routes: ROUTES });
   });
 
   app.get('/secret', (req, res) => {
     res.json({ secretKey: SECRET_KEY });
   });
 
-  // ===== Error Handling =====
-
-  // 404 - Not Found
   app.use((req, res) => {
-    res.status(404).json({ 
-      error: 'Not Found', 
-      path: req.path,
-      method: req.method
-    });
+    res.status(404).json({ error: 'Not Found', path: req.path, method: req.method });
   });
 
-  // Global error handler
   app.use((err, req, res, next) => {
     console.error('Error:', err);
-    res.status(err.status || 400).json({ 
-      error: err.message || 'Internal Server Error',
-      details: process.env.NODE_ENV === 'development' ? err.stack : undefined
-    });
+    res.status(err.status || 400).json({ error: err.message || 'Internal Server Error', details: process.env.NODE_ENV === 'development' ? err.stack : undefined });
   });
 };
 
-// ===== Start Server =====
-
 const startServer = async () => {
   try {
-    // 1. Connect to MongoDB
     const mongoConn = await connectDB();
-    
-    // 2. Initialize and add session middleware BEFORE routes
     initializeSessionMiddleware(mongoConn);
     app.use(getSessionMiddleware());
-    
-    // 3. Setup all routes AFTER session middleware
     setupRoutes();
-    
-    // 4. Initialize default users
     await initializeDefaultUsers();
-
-    // 5. Start listening
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`\n================================`);
       console.log(`✅ Server running on http://localhost:${PORT}`);

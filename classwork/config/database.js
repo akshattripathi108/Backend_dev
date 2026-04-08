@@ -1,10 +1,5 @@
 const mongoose = require('mongoose');
 
-/**
- * MongoDB Connection Configuration
- * Connects to MongoDB and returns the connection
- */
-
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/middleware_auth_db';
 
 let mongoConnection = null;
@@ -13,10 +8,8 @@ const connectDB = async () => {
   try {
     const conn = await mongoose.connect(MONGO_URI);
     mongoConnection = conn;
-
     console.log(`\n✅ MongoDB Connected: ${conn.connection.host}`);
     console.log(`📊 Database: ${conn.connection.name}\n`);
-    
     return conn;
   } catch (error) {
     console.error(`\n❌ MongoDB Connection Error: ${error.message}`);

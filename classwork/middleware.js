@@ -1,9 +1,7 @@
 const { encryptPayload } = require('./encrypt');
 const { decryptPayload } = require('./decrypt');
-const parseJsonSafe = value => {
-  if (typeof value !== 'string') return value;
-  try { return JSON.parse(value); } catch { return value; }
-};
+const parseJsonSafe = value => typeof value !== 'string' ? value : (() => { try { return JSON.parse(value); } catch { return value; } })();
+
 const decryptRequestMiddleware = (secretKey, options = {}) => {
   const { payloadField = 'data' } = options;
   if (!secretKey) throw new TypeError('decryptRequestMiddleware requires a secretKey.');
@@ -20,6 +18,7 @@ const decryptRequestMiddleware = (secretKey, options = {}) => {
     }
   };
 };
+
 const encryptResponseMiddleware = (secretKey, options = {}) => {
   const { payloadField = 'data', autoEncrypt = false } = options;
   if (!secretKey) throw new TypeError('encryptResponseMiddleware requires a secretKey.');
@@ -40,4 +39,5 @@ const encryptResponseMiddleware = (secretKey, options = {}) => {
     next();
   };
 };
+
 module.exports = { decryptRequestMiddleware, encryptResponseMiddleware };
