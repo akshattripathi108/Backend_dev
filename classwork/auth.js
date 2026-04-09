@@ -7,11 +7,11 @@ const initializeDefaultUsers = async () => {
     const aliceExists = await User.findOne({ username: 'alice' });
     const bobExists = await User.findOne({ username: 'bob' });
     if (!aliceExists) {
-      await User.create({ username: 'alice', password: 'password123', email: 'alice@example.com' });
+      await User.create({ username: 'alice', password: 'password123', email: 'alice@example.com', role: 'admin', designation: 'Administrator' });
       console.log('✅ Created default user: alice');
     }
     if (!bobExists) {
-      await User.create({ username: 'bob', password: 'securepass', email: 'bob@example.com' });
+      await User.create({ username: 'bob', password: 'securepass', email: 'bob@example.com', role: 'user', designation: 'Developer' });
       console.log('✅ Created default user: bob');
     }
   } catch (error) {
@@ -22,17 +22,17 @@ const initializeDefaultUsers = async () => {
 const verifyCredentials = async (username, password) => {
   const user = await User.findOne({ username });
   if (!user || user.password !== password) return null;
-  return { id: user._id.toString(), username: user.username, email: user.email };
+  return { id: user._id.toString(), username: user.username, email: user.email, role: user.role, designation: user.designation };
 };
 
 const registerHandler = async (req, res, credentials) => {
-  const { username, password, email } = credentials;
-  if (!username || !password || !email) return { success: false, message: 'Username, email, and password are required' };
+  const { username, password, email, role, designation } = credentials;
+  if (!username || !password || !email || !role || !designation) return { success: false, message: 'Username, email, password, role, and designation are required' };
   const normalizedUsername = username.toLowerCase().trim();
   const existingUser = await User.findOne({ $or: [{ username: normalizedUsername }, { email: email.toLowerCase().trim() }] });
   if (existingUser) return { success: false, message: 'Username or email already in use' };
-  const user = await User.create({ username: normalizedUsername, password, email: email.toLowerCase().trim() });
-  const sessionUser = { id: user._id.toString(), username: user.username, email: user.email };
+  const user = await User.create({ username: normalizedUsername, password, email: email.toLowerCase().trim(), role, designation });
+  const sessionUser = { id: user._id.toString(), username: user.username, email: user.email, role: user.role, designation: user.designation };
   req.session.user = createSessionData(sessionUser);
   req.session.lastActivity = Date.now();
   setTrackingCookie(res, `tracking_${user._id.toString()}_${Date.now()}`);
@@ -52,7 +52,7 @@ const loginHandler = async (req, res, credentials) => {
     console.error('Error updating login info:', error);
   }
   setTrackingCookie(res, `tracking_${user.id}_${Date.now()}`);
-  return { success: true, message: 'Login successful', user: { id: user.id, username: user.username, email: user.email } };
+  return { success: true, message: 'Login successful', user: { id: user.id, username: user.username, email: user.email, role: user.role, designation: user.designation } };
 };
 
 const sessionCheckMiddleware = (req, res, next) => {
@@ -70,6 +70,8 @@ const getProfileHandler = async (req) => {
       id: user._id.toString(),
       username: user.username,
       email: user.email,
+      role: user.role,
+      designation: user.designation,
       lastLogin: user.lastLogin,
       loginCount: user.loginCount,
       sessionCreated: new Date(req.session.user.createdAt).toISOString(),
